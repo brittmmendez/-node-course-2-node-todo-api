@@ -11,6 +11,7 @@ const {User} = require('./models/user');
 
 //stores the expres application
 const app = express();
+const port = process.env.PORT || 3000;
 
 //takes the body data sent from client json and convert it to an object attaching it on to the request object
 app.use(bodyParser.json());
@@ -61,8 +62,8 @@ app.get('/todos/:id', (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log('Started on port 3000');
+app.listen(port, () => {
+  console.log(`Started on port ${port}`);
 })
 
 module.exports = {app};
