@@ -1,16 +1,15 @@
-const {mongoose} = require('./mongoose');
+const mongoose = require('mongoose');
 
-let User = mongoose.model('User', {
+const User = mongoose.model('User', {
   email: {
     type: String,
-    required: true,   //validator
-    minlength: 1,     //validator
-    trim: true        //validator
-  },
-})
+    required: true,
+    trim: true,
+    minlength: 1
+  }
+});
 
-module.export = {User};
-
+module.exports = {User}
 
 //examples:
 // //create a variable (any name you want) must create a new instance of Todo

@@ -1,25 +1,25 @@
-const {mongoose} = require('./mongoose');
 
+const mongoose = require('mongoose');
 //create a Mongoose model so it knows how to store the data
 //1st arg is the string name, 2nd is an ogject to define properties for a model
-let Todo= mongoose.model('Todo', {
+const Todo = mongoose.model('Todo', {
   text: {
     type: String,
-    required: true, //validator
-    minlength: 5,   //validator
-    trim: true      //validator
+    required: true,
+    minlength: 1,
+    trim: true
   },
   completed: {
     type: Boolean,
-    default: false  //default
+    default: false
   },
   completedAt: {
     type: Number,
-    default: null   //default
+    default: null
   }
-})
+});
 
-module.export = {Todo};
+module.exports = {Todo};
 
 //examples:
 // //create a variable (any name you want) must create a new instance of Todo
