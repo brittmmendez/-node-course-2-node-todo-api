@@ -1,4 +1,5 @@
 //library imports
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
@@ -32,6 +33,9 @@ app.post('/todos', (req, res) => {
   });
 });
 
+
+
+
 //READ
   app.get('/todos', (req, res) => {
     //create an instance of mongoose model
@@ -46,13 +50,15 @@ app.post('/todos', (req, res) => {
 app.get('/todos/:id', (req, res) => {
   let id = req.params.id;
 
-  //handles the error if ID isn't found
+  //validate id
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
   };
 
   //create an instance of mongoose model
   Todo.findById(id).then((todo) => {
+
+    //handles the error if ID isn't found
     if (!todo) {
       return res.status(404).send();
     }
@@ -63,16 +69,21 @@ app.get('/todos/:id', (req, res) => {
   });
 });
 
+
+
+
+//DELETE by ID
 app.delete('/todos/:id', (req, res) => {
   let id = req.params.id;
-
-  //handles the error if ID isn't found
+  //validate id
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
   };
 
   //create an instance of mongoose model
   Todo.findByIdAndRemove(id).then((todo) => {
+
+    //handles the error if ID isn't found
     if (!todo) {
       return res.status(404).send();
     }
@@ -82,6 +93,42 @@ app.delete('/todos/:id', (req, res) => {
     res.status(400).send();
   });
 });
+
+
+
+//UPDATE by id
+  app.patch('/todos/:id', (req, res) => {
+    let id = req.params.id;
+
+    //needed lodash for this specifically so users can't change things I don't want them to.
+    //This checks the body of the request and picks the two items in my array and will only update this
+    let body = _.pick(req.body, ['text', 'completed']);
+
+    //validate id
+    if (!ObjectID.isValid(id)) {
+      return res.status(404).send();
+    };
+
+    //updated the completed at based on body prop
+    if (_.isBoolean(body.completed) && body.completed) {
+      body.completedAt = new Date().getTime();
+    }else{
+      body.completed = false;
+      body.completedAt = null;
+    }
+
+    //make our call to find by id and update
+    Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+      //handles the error if ID isn't found
+      if (!todo) {
+        return res.status(404).send();
+      }
+
+      res.send({todo});
+    }).catch((e) => {
+      res.status(400).send();
+    });
+  });
 
 
 app.listen(port, () => {
