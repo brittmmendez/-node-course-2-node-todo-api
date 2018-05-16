@@ -9,8 +9,9 @@ const {Todo} = require('./models/todo');
 const {User} = require('./models/user');
 
 
-//stores the expres application
+//stores the express application
 const app = express();
+//sets up local port or heroku port
 const port = process.env.PORT || 3000;
 
 //takes the body data sent from client json and convert it to an object attaching it on to the request object
@@ -61,6 +62,27 @@ app.get('/todos/:id', (req, res) => {
     res.status(400).send();
   });
 });
+
+app.delete('/todos/:id', (req, res) => {
+  let id = req.params.id;
+
+  //handles the error if ID isn't found
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  };
+
+  //create an instance of mongoose model
+  Todo.findByIdAndRemove(id).then((todo) => {
+    if (!todo) {
+      return res.status(404).send();
+    }
+
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send();
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
