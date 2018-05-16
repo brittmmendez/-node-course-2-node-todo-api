@@ -124,8 +124,8 @@ app.post('/users', (req, res) => {
 });
 
 // GET /users/:id
-app.get('/users/me', authenticate, (req, res) => {
-  res.send(req.user);
+app.get('/users/me', authenticate, (req, res) => {  //runs middleware authencate and sends response below if no errors
+  res.send(req.user);  //sending the user the request with the info we found/set in findByToken
 });
 
 
