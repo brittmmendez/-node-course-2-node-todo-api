@@ -1,27 +1,42 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
-const User = mongoose.model('User', {
+// {
+//   email: 'andrew@example.com',
+//   password: 'adpsofijasdfmpoijwerew',
+//   tokens: [{
+//     access: 'auth',
+//     token: 'poijasdpfoimasdpfjiweproijwer'
+//   }]
+// }
+
+var User = mongoose.model('User', {
   email: {
     type: String,
     required: true,
     trim: true,
-    minlength: 1
-  }
+    minlength: 1,
+    unique: true,
+    validate: {  //works because we installed validator
+      validator: validator.isEmail,
+      message: '{VALUE} is not a valid email'
+    }
+  },
+  password: {
+    type: String,
+    require: true,
+    minlength: 6
+  },
+  tokens: [{
+    access: {
+      type: String,
+      required: true
+    },
+    token: {
+      type: String,
+      required: true
+    }
+  }]
 });
 
 module.exports = {User}
-
-//examples:
-// //create a variable (any name you want) must create a new instance of Todo
-// let newUser = new User({
-//   email: 'brittmmendez@gmail.com'
-// })
-//
-// //creating the instance above doesn't save it to the db... variableName.save()
-// newUser.save().then((doc) => {
-//   console.log('Saved User:', doc);
-// }, (e) => {
-//   console.log('Unable to save user');
-// })
-//
-//
