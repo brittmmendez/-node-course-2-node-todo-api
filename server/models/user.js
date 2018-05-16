@@ -1,16 +1,9 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 
-// {
-//   email: 'andrew@example.com',
-//   password: 'adpsofijasdfmpoijwerew',
-//   tokens: [{
-//     access: 'auth',
-//     token: 'poijasdpfoimasdpfjiweproijwer'
-//   }]
-// }
-
-var User = mongoose.model('User', {
+const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -38,5 +31,27 @@ var User = mongoose.model('User', {
     }
   }]
 });
+
+//override the method generateAuthToken -  this will decide what gets sent back when a mongooose model is converted into a JSON VALUE
+UserSchema.methods.toJSON = function () {
+  let user = this;
+  let userObject = user.toObject();
+
+  return _.pick(userObject, ['_id', 'email'])
+}
+
+UserSchema.methods.generateAuthToken = function () { //use reg function and not Array function because arrays don't bing 'this' keyword
+  let user = this;
+  let access = 'auth';
+  let token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
+
+  user.tokens.push({access, token});
+
+  return user.save().then(() => {
+    return token;
+  });
+};
+
+let User = mongoose.model('User', UserSchema);
 
 module.exports = {User}
