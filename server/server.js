@@ -8,6 +8,7 @@ const {ObjectID} = require('mongodb');      //Create a new ObjectID instance
 const {mongoose} = require('./db/mongoose');      //Mongoose is a MongoDB object modeling tool designed to work in an asynchronous environment.
 const {Todo} = require('./models/todo');
 const {User} = require('./models/user');
+const {authenticate} = require('./middleware/authenticate');
 
 
 const app = express();      //stores the express application
@@ -122,6 +123,10 @@ app.post('/users', (req, res) => {
   })
 });
 
+// GET /users/:id
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
+});
 
 
 app.listen(port, () => {
