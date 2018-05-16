@@ -136,13 +136,19 @@ app.post('/users/login', (req, res) => {
   User.findByCredentials(body.email, body.password).then((user) => {    //call to veryfy if  user exsists with that email. check password
     user.generateAuthToken().then((token) => {
       res.header('x-auth', token).send(user);  //send the token back as an http header. x-auth is a custom header for our specific purpose.
-    })
+    });
   }).catch((e) =>{
     res.status(400).send();
-  })
+  });
+});
 
-
-})
+app.delete('/users/me/token', authenticate, (req, res) => {
+  req.user.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }, () => {
+    res.status(400).send();
+  });
+});
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);

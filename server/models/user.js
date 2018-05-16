@@ -54,6 +54,15 @@ UserSchema.methods.generateAuthToken = function () { //use reg function and not 
   });
 };
 
+UserSchema.methods.removeToken = function (token) {
+  let user = this;
+  return user.update({
+    $pull: {
+      tokens: {token}
+    }
+  });
+};
+
 //this will run before we save the doc to the database to make the changes we need to it
 UserSchema.pre('save', function (next) {
   let user = this;
