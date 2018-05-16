@@ -114,9 +114,9 @@ app.post('/users', (req, res) => {
   var user = new User(body);
 
   user.save().then(() => {
-    return user.generateAuthToken();
+    return user.generateAuthToken();   //call the method to geenrate token
   }).then((token) => {
-    res.header('x-auth', token).send(user);
+    res.header('x-auth', token).send(user);  //send the token back as an http header. x-auth is a custom header for our specific purpose.
   }).catch((e) => {
     res.status(400).send(e);
   })
