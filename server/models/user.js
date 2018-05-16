@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 //stores the schema for a user -- all the props that we define to rquire/validate
 const UserSchema = new mongoose.Schema({
@@ -52,6 +53,22 @@ UserSchema.methods.generateAuthToken = function () { //use reg function and not 
     return token;
   });
 };
+
+//this will run before we save the doc to the database to make the changes we need to it
+UserSchema.pre('save', function (next) {
+  let user = this;
+
+  if (user.isModified('password')){
+    bcrypt.genSalt(10, (err, salt) => {  //create the salt
+      bcrypt.hash(user.password, salt, (err, hash) => {  //call hash with user pw and salt with a cb func
+        user.password = hash;  //update user document with new password
+        next(); //complete the middle ware and move on to save
+      });
+    });
+  }else {
+    next();
+  }
+});
 
 //model method
 UserSchema.statics.findByToken = function (token) {
