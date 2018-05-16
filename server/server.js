@@ -17,9 +17,10 @@ const port = process.env.PORT || 3000      //sets up local port or heroku port
 app.use(bodyParser.json());     //middleware - takes the body data sent from client json and convert it to an object attaching it on to the request object
 
 //CREATE - make new todo by sending JSON obj with text prop to server -> server will take it create document and send back doc
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
   let newTodo = new Todo({     //create an instance of mongoose model
-    text: req.body.text
+    text: req.body.text,
+    _creator: req.user._id
   });
 
   newTodo.save().then((doc) =>{     //save model to db
@@ -30,8 +31,10 @@ app.post('/todos', (req, res) => {
 });
 
 //READ
-  app.get('/todos', (req, res) => {
-    Todo.find().then((todos) =>{    //create an instance of mongoose model
+  app.get('/todos', authenticate, (req, res) => {
+    Todo.find({
+      _creator: req.user._id  //only returns todo  made by this user
+    }).then((todos) =>{    //create an instance of mongoose model
       res.send({todos});
     }, (e) => {
       res.status(400).send(e);
@@ -39,15 +42,17 @@ app.post('/todos', (req, res) => {
   });
 
 //READ by ID
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', authenticate, (req, res) => {
   let id = req.params.id;
 
   if (!ObjectID.isValid(id)) {      //validate id
     return res.status(404).send();
   };
 
-  Todo.findById(id).then((todo) => {    //create an instance of mongoose model
-
+  Todo.findOne({
+    _id: id,
+    _creator: req.user._id  //only returns todo  made by this user
+  }).then((todo) => {    //create an instance of mongoose model
     if (!todo) {      //handles the error if ID isn't found
       return res.status(404).send();
     }
@@ -59,15 +64,17 @@ app.get('/todos/:id', (req, res) => {
 });
 
 //DELETE by ID
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
   let id = req.params.id;
 
   if (!ObjectID.isValid(id)) {      //validate id
     return res.status(404).send();
-  };
+  }
 
-  Todo.findByIdAndRemove(id).then((todo) => {   //create an instance of mongoose model
-
+  Todo.findOneAndRemove({
+    _id: id,
+    _creator: req.user._id  //only returns todo  made by this user
+  }).then((todo) => {   //create an instance of mongoose model
     if (!todo) {      //handles the error if ID isn't found
       return res.status(404).send();
     }
@@ -81,9 +88,8 @@ app.delete('/todos/:id', (req, res) => {
 
 
 //UPDATE by id
-  app.patch('/todos/:id', (req, res) => {
+  app.patch('/todos/:id', authenticate, (req, res) => {
     let id = req.params.id;
-
     let body = _.pick(req.body, ['text', 'completed']);     //needed lodash for this specifically so users can't change things I don't want them to. This checks the body of the request and picks the two items in my array and will only update this
 
     if (!ObjectID.isValid(id)) {      //validate id
@@ -97,7 +103,7 @@ app.delete('/todos/:id', (req, res) => {
       body.completedAt = null;
     }
 
-    Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {  //make our call to find by id and update
+    Todo.findOneAndUpdate({_id: id, _creator: req.user._id}, {$set: body}, {new: true}).then((todo) => {  //make our call to find by id and update
       if (!todo) {    //handles the error if ID isn't found
         return res.status(404).send();
       }
@@ -105,7 +111,7 @@ app.delete('/todos/:id', (req, res) => {
       res.send({todo});
     }).catch((e) => {
       res.status(400).send();
-    });
+    })
   });
 
 //***************Users***************//
@@ -131,7 +137,7 @@ app.get('/users/me', authenticate, (req, res) => {  //runs middleware authencate
 
 //POST /user/login {email, password}
 app.post('/users/login', (req, res) => {
-  var body = _.pick(req.body, ['email', 'password']);
+  let body = _.pick(req.body, ['email', 'password']);
 
   User.findByCredentials(body.email, body.password).then((user) => {    //call to veryfy if  user exsists with that email. check password
     user.generateAuthToken().then((token) => {

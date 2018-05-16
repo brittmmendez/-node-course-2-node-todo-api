@@ -16,6 +16,10 @@ const Todo = mongoose.model('Todo', {
   completedAt: {
     type: Number,
     default: null
+  },
+  _creator: {   //updated model to create association between user and todo
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
   }
 });
 
