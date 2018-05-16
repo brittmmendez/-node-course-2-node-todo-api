@@ -109,7 +109,7 @@ app.delete('/todos/:id', (req, res) => {
   });
 
 //***************Users***************//
-// POST /users
+// POST /users  -> sign up
 app.post('/users', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
   var user = new User(body);
@@ -128,6 +128,21 @@ app.get('/users/me', authenticate, (req, res) => {  //runs middleware authencate
   res.send(req.user);  //sending the user the request with the info we found/set in findByToken
 });
 
+
+//POST /user/login {email, password}
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password).then((user) => {    //call to veryfy if  user exsists with that email. check password
+    user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);  //send the token back as an http header. x-auth is a custom header for our specific purpose.
+    })
+  }).catch((e) =>{
+    res.status(400).send();
+  })
+
+
+})
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);

@@ -71,7 +71,7 @@ UserSchema.pre('save', function (next) {
 });
 
 //model method
-UserSchema.statics.findByToken = function (token) {
+UserSchema.statics.findByToken = function (token) {  //use reg function and not Array function because arrays don't bing 'this' keyword
   let User = this;
   let decoded;
 
@@ -87,6 +87,28 @@ UserSchema.statics.findByToken = function (token) {
     'tokens.access': 'auth'
   });
 };
+
+
+UserSchema.statics.findByCredentials = function (email, password) {  //use reg function and not Array function because arrays don't bing 'this' keyword
+  let User = this;
+
+  return User.findOne({email}).then((user) => {
+    if (!user) {
+      return promise.reject();
+    }
+
+    return new Promise((resolve, reject) => {
+      bcrypt.compare(password, user.password, (err, res) =>{
+        if (res) {
+          resolve(user);
+        }else {
+          reject();
+        }
+      });
+    });
+  });
+};
+
 
 let User = mongoose.model('User', UserSchema);
 
