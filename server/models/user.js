@@ -6,11 +6,18 @@ const bcrypt = require('bcryptjs');
 
 //stores the schema for a user -- all the props that we define to rquire/validate
 const UserSchema = new mongoose.Schema({
+  first_name: {
+    type: String,
+    required: true,
+  },
+  last_name:{
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     required: true,
     trim: true,
-    minlength: 1,
     unique: true,
     validate: {  //works because we installed validator
       validator: validator.isEmail,
@@ -20,7 +27,10 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     require: true,
-    minlength: 6
+  },
+  passwordConf: {
+    type: String,
+    required: true,
   },
   tokens: [{
     access: {
@@ -38,14 +48,14 @@ UserSchema.methods.toJSON = function () {   //override the method generateAuthTo
   let user = this;
   let userObject = user.toObject();
 
-  return _.pick(userObject, ['_id', 'email'])
+  return _.pick(userObject, ['_id', 'first_name', 'last_name', 'email'])
 }
 
 //instance method responsible for adding a token on to the individual user document
 UserSchema.methods.generateAuthToken = function () { //use reg function and not Array function because arrays don't bing 'this' keyword
   let user = this;
   let access = 'auth';
-  let token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString(); //generates the token
+  let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString(); //generates the token
 
   user.tokens.push({access, token}); //update users array to push in the {auth: token} object we created above
 
@@ -97,7 +107,6 @@ UserSchema.statics.findByToken = function (token) {  //use reg function and not 
   });
 };
 
-
 UserSchema.statics.findByCredentials = function (email, password) {  //use reg function and not Array function because arrays don't bing 'this' keyword
   let User = this;
 
@@ -117,7 +126,6 @@ UserSchema.statics.findByCredentials = function (email, password) {  //use reg f
     });
   });
 };
-
 
 let User = mongoose.model('User', UserSchema);
 

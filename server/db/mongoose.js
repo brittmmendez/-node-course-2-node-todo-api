@@ -1,11 +1,6 @@
-//load in mongoose
-const mongoose = require('mongoose');
+const mongoose = require('mongoose');         //load in mongoose
 
-//tell mongoose which promise library to use
-mongoose.Promise = global.Promise;
-//connect mongoose to our local mongodb or herokuDB so we can start writing data to db until mongoose knows how to connect
-mongoose.connect(process.env.MONGODB_URI);
-
-
+mongoose.Promise = global.Promise;            //tell mongoose which promise library to use
+mongoose.connect(process.env.MONGODB_URI);    //connect mongoose to our local mongodb or herokuDB so we can start writing data to db
 
 module.exports = {mongoose};
