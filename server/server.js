@@ -11,11 +11,16 @@ const {mongoose} = require('./db/mongoose');    //Mongoose is a MongoDB object m
 const {Player} = require('./models/player');
 const {User} = require('./models/user');
 const {authenticate} = require('./middleware/authenticate');
+// const userRouter = require('./routes/user');
+// const playerRouter = require('./routes/player');
 
 const app = express();                          //stores the express application
 const port = process.env.PORT                   //sets up local port or heroku port
 
 app.use(bodyParser.json());                     //middleware - takes the body data sent from client json and convert it to an object attaching it on to the request object
+// app.use(userRouter)
+// app.use(playerRouter)
+
 
 //CREATE PLAYER
 app.post('/api/players', authenticate, (req, res) => {
@@ -124,9 +129,10 @@ app.patch('/api/players/:id', authenticate, (req, res) => {
 
 // CREATE USER
 app.post('/api/user', (req, res) => {
-  let body = _.pick(req.body, ['first_name', 'last_name', 'email', 'password', 'passwordConf']);
+  let passwordConf =req.body.passwordConf
+  let body = _.pick(req.body, ['first_name', 'last_name', 'email', 'password']);
 
-  if (body.password !== body.passwordConf) {                //confirm password
+  if (body.password !== passwordConf) {                //confirm password
     return res.status(400).send('Error: Password and confirmation password must match');
   }
 
