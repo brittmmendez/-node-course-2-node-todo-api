@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const _ = require('lodash');
 const bcrypt = require('bcryptjs');
 
-//stores the schema for a user -- all the props that we define to rquire/validate
+//stores the schema for a user
 const UserSchema = new mongoose.Schema({
   first_name: {
     type: String,
@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema({
     required: true,
     trim: true,
     unique: true,
-    validate: {  //works because we installed validator
+    validate: {
       validator: validator.isEmail,
       message: '{VALUE} is not a valid email'
     }
@@ -44,7 +44,7 @@ const UserSchema = new mongoose.Schema({
   }]
 });
 
-UserSchema.methods.toJSON = function () {   //override the method generateAuthToken -  this will decide what gets sent back when a mongooose model is converted into a JSON VALUE
+UserSchema.methods.toJSON = function () {     //override the method generateAuthToken -  this will decide what gets sent back when a mongooose model is converted into a JSON VALUE
   let user = this;
   let userObject = user.toObject();
 
@@ -52,7 +52,7 @@ UserSchema.methods.toJSON = function () {   //override the method generateAuthTo
 }
 
 //instance method responsible for adding a token on to the individual user document
-UserSchema.methods.generateAuthToken = function () { //use reg function and not Array function because arrays don't bing 'this' keyword
+UserSchema.methods.generateAuthToken = function () { //use reg function and not Array function because arrays don't bins 'this' keyword
   let user = this;
   let access = 'auth';
   let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString(); //generates the token
@@ -90,12 +90,12 @@ UserSchema.pre('save', function (next) {
 });
 
 //model method
-UserSchema.statics.findByToken = function (token) {  //use reg function and not Array function because arrays don't bing 'this' keyword
+UserSchema.statics.findByToken = function (token) {
   let User = this;
   let decoded;
 
   try {
-    decoded = jwt.verify(token, 'abc123');
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
   } catch (e) {
     return Promise.reject();
   }
@@ -107,7 +107,7 @@ UserSchema.statics.findByToken = function (token) {  //use reg function and not 
   });
 };
 
-UserSchema.statics.findByCredentials = function (email, password) {  //use reg function and not Array function because arrays don't bing 'this' keyword
+UserSchema.statics.findByCredentials = function (email, password) {
   let User = this;
 
   return User.findOne({email}).then((user) => {
