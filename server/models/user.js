@@ -44,7 +44,7 @@ const UserSchema = new mongoose.Schema({
   }]
 });
 
-UserSchema.methods.toJSON = function () {     //override the method generateAuthToken -  this will decide what gets sent back when a mongooose model is converted into a JSON VALUE
+UserSchema.methods.toJSON = function () {                 //override the method generateAuthToken -  this will decide what gets sent back when a mongooose model is converted into a JSON VALUE
   let user = this;
   let userObject = user.toObject();
 
@@ -52,14 +52,14 @@ UserSchema.methods.toJSON = function () {     //override the method generateAuth
 }
 
 //instance method responsible for adding a token on to the individual user document
-UserSchema.methods.generateAuthToken = function () { //use reg function and not Array function because arrays don't bins 'this' keyword
+UserSchema.methods.generateAuthToken = function () {      //use reg function and not Array function because arrays don't bins 'this' keyword
   let user = this;
   let access = 'auth';
   let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString(); //generates the token
 
-  user.tokens.push({access, token}); //update users array to push in the {auth: token} object we created above
+  user.tokens.push({access, token});                      //update users array to push in the {auth: token} object we created above
 
-  return user.save().then(() => {  // we updated the user model above but need to save.. we a retuning the save to chain on a promise in server.js
+  return user.save().then(() => {                         // we updated the user model above but need to save.. we a retuning the save to chain on a promise in server.js
     return token;
   });
 };
@@ -78,10 +78,10 @@ UserSchema.pre('save', function (next) {
   let user = this;
 
   if (user.isModified('password')){
-    bcrypt.genSalt(10, (err, salt) => {  //create the salt
-      bcrypt.hash(user.password, salt, (err, hash) => {  //call hash with user pw and salt with a cb func
-        user.password = hash;  //update user document with new password
-        next(); //complete the middle ware and move on to save
+    bcrypt.genSalt(10, (err, salt) => {                   //create the salt
+      bcrypt.hash(user.password, salt, (err, hash) => {   //call hash with user pw and salt with a cb func
+        user.password = hash;                             //update user document with new password
+        next();                                           //move on to save
       });
     });
   }else {
@@ -89,7 +89,7 @@ UserSchema.pre('save', function (next) {
   }
 });
 
-//model method
+//model methods:
 UserSchema.statics.findByToken = function (token) {
   let User = this;
   let decoded;

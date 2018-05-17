@@ -8,16 +8,22 @@ const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
 const users = [{
   _id: userOneId,
-  email: 'andrew@example.com',
+  first_name: 'Brittany',
+  last_name: 'Morris' ,
+  email: 'brittany@example.com',
   password: 'userOnePass',
+  passwordConf: 'userOnePass',
   tokens: [{
     access: 'auth',
     token: jwt.sign({_id: userOneId, access: 'auth'}, 'abc123').toString()
   }]
 }, {
   _id: userTwoId,
-  email: 'jen@example.com',
+  first_name: 'Ryan',
+  last_name: 'Morris' ,
+  email: 'Ryan@example.com',
   password: 'userTwoPass',
+  passwordConf: 'userTwoPass',
   tokens: [{
     access: 'auth',
     token: jwt.sign({_id: userTwoId, access: 'auth'}, 'abc123').toString()
@@ -26,13 +32,17 @@ const users = [{
 
 const players = [{
   _id: new ObjectID(),
-  text: 'First test player',
+  first_name: 'First test player',
+  last_name: 'First test player',
+  rating: 3,
+  handedness: 'right',
   _creator: userOneId
 }, {
   _id: new ObjectID(),
-  text: 'Second test player',
-  completed: true,
-  completedAt: 333,
+  first_name: 'Second test player',
+  last_name: 'Second test player',
+  rating: 3,
+  handedness: "left",
   _creator: userTwoId
 }];
 

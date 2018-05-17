@@ -29,11 +29,11 @@ app.post('/api/players', authenticate, (req, res) => {
     last_name:req.body.last_name
   }).then((player) => {
     if (player) {
-      return res.status(400).send('Error: PUser already exists');
+      return res.status(400).send('Error: Player already exists');
     }
   })
 
-  let newPlayer = new Player({                   //create an instance of mongoose model
+  let newPlayer = new Player({                   //create an instance of mongoose Player model
     first_name: req.body.first_name,
     last_name: req.body.last_name,
     rating: req.body.rating,
@@ -41,7 +41,7 @@ app.post('/api/players', authenticate, (req, res) => {
     _creator: req.user._id
   });
 
-  newPlayer.save().then((doc) =>{                 //save model to db
+  newPlayer.save().then((doc) =>{                 //save player to db
     res.send(doc)
   }, (e) => {
     res.status(400).send(e);
@@ -52,7 +52,7 @@ app.post('/api/players', authenticate, (req, res) => {
 app.get('/api/players', authenticate, (req, res) => {
   Player.find({
     _creator: req.user._id                        //only returns player  made by this user
-  }).then((players) =>{                           //create an instance of mongoose model
+  }).then((players) =>{
     res.send({players});
   }, (e) => {
     res.status(400).send(e);
@@ -106,20 +106,13 @@ app.delete('api/players/:id', authenticate, (req, res) => {
 
 
 //UPDATE PLAYER
-app.patch('/players/:id', authenticate, (req, res) => {
+app.patch('/api/players/:id', authenticate, (req, res) => {
   let id = req.params.id;
-  let body = _.pick(req.body, ['text', 'completed']);     //needed lodash for this specifically so users can't change things I don't want them to. This checks the body of the request and picks the two items in my array and will only update this
-
+  // let body = _.pick(req.body, ['text', 'completed']);     //needed lodash for this specifically so users can't change things I don't want them to. This checks the body of the request and picks the two items in my array and will only update this
+  let body = _.pick(req.body, ['first_name', 'last_name', 'rating', 'handedness']);
   if (!ObjectID.isValid(id)) {                            //validate id
     return res.status(404).send();
   };
-
-  if (_.isBoolean(body.completed) && body.completed) {    //updated the completed at based on body prop
-    body.completedAt = new Date().getTime();
-  }else{
-    body.completed = false;
-    body.completedAt = null;
-  }
 
   Player.findOneAndUpdate({_id: id, _creator: req.user._id}, {$set: body}, {new: true}).then((player) => {  //make our call to find by id and update
     if (!player) {
@@ -169,7 +162,7 @@ app.post('/api/login', (req, res) => {
 });
 
 //SIGN OUT
-app.delete('/api/users/:id/logout', authenticate, (req, res) => {
+app.delete('/api/logout', authenticate, (req, res) => {
   req.user.removeToken(req.token).then(() => {
     res.status(200).send();
   }, () => {
