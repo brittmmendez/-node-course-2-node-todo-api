@@ -30,22 +30,22 @@ app.post('/api/players', authenticate, (req, res) => {
   }).then((player) => {
     if (player) {
       return res.status(400).send('Error: Player already exists');
+    } else {
+      let newPlayer = new Player({                   //create an instance of mongoose Player model
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        rating: req.body.rating,
+        handedness: req.body.handedness,
+        _creator: req.user._id
+      });
+
+      newPlayer.save().then((doc) =>{                 //save player to db
+        res.send(doc)
+      }, (e) => {
+        res.status(400).send(e);
+      });
     }
   })
-
-  let newPlayer = new Player({                   //create an instance of mongoose Player model
-    first_name: req.body.first_name,
-    last_name: req.body.last_name,
-    rating: req.body.rating,
-    handedness: req.body.handedness,
-    _creator: req.user._id
-  });
-
-  newPlayer.save().then((doc) =>{                 //save player to db
-    res.send(doc)
-  }, (e) => {
-    res.status(400).send(e);
-  });
 });
 
 //LIST ALL PLAYERS
@@ -82,9 +82,8 @@ app.get('/api/players/:id', authenticate, (req, res) => {
 });
 
 //DELETE PLAYER
-app.delete('api/players/:id', authenticate, (req, res) => {
+app.delete('/api/players/:id', authenticate, (req, res) => {
   let id = req.params.id;
-
   if (!ObjectID.isValid(id)) {                      //validate id
     return res.status(404).send();
   }
@@ -94,7 +93,7 @@ app.delete('api/players/:id', authenticate, (req, res) => {
     _creator: req.user._id                          //only returns player  made by this user
   }).then((player) => {                             //create an instance of mongoose model
     if (!player) {                                 //handles the error if ID isn't found
-      return res.status(404).send();
+      return res.status(400).send();
     }
 
     res.send({player});
@@ -102,8 +101,6 @@ app.delete('api/players/:id', authenticate, (req, res) => {
     res.status(400).send();
   });
 });
-
-
 
 //UPDATE PLAYER
 app.patch('/api/players/:id', authenticate, (req, res) => {
