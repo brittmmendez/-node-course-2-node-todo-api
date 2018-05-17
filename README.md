@@ -1,4 +1,4 @@
-# node-course-2-node-todo-api
+Playerd API Practice
 
 This lab practiced:
   - setting up MongoDB
